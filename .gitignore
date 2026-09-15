@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Pendiente de `gh auth refresh -s workflow` (ver DEPLOY.md)
+.github/workflows/

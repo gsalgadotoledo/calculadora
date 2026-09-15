@@ -18,10 +18,23 @@ estático gratuito la sirve. De más fácil a más «formal»:
   la Action de abajo. Es la única que necesita `base: '/calculadora/'` en
   `vite.config.js` (la app cuelga de una subruta); el resto sirven en raíz.
 
-## GitHub Pages (cuando el repo tenga remote)
+## Cómo está publicada hoy
 
-1. `vite.config.js`: `base: process.env.VITE_BASE ?? '/'`, y en la Action
-   `VITE_BASE=/calculadora/`.
-2. `.github/workflows/pages.yml`: checkout → `npm ci` → `npm run build` →
-   `actions/upload-pages-artifact` (`dist`) → `actions/deploy-pages`.
-3. En el repo: Settings → Pages → Source: *GitHub Actions*.
+**https://gsalgadotoledo.github.io/calculadora/** — GitHub Pages sirviendo la
+rama `gh-pages` (repo <https://github.com/gsalgadotoledo/calculadora>).
+
+Actualizar: `npm run deploy` — hace `vite build` con `VITE_BASE=/calculadora/`
+y sube `dist/` a `gh-pages` (paquete `gh-pages`). Pages la publica en ~1 min.
+
+## Para que se publique sola en cada push (pendiente)
+
+`.github/workflows/pages.yml` ya está escrito, pero **no está subido**: el token
+de `gh` (OAuth) no tiene el scope `workflow` y GitHub rechaza cualquier push o
+llamada API que cree un archivo en `.github/workflows/`. Cuando se quiera:
+
+1. `gh auth refresh -s workflow` (abre el navegador una vez).
+2. Quitar `.github/workflows/` de `.gitignore`, `git add .github && git commit -m "Action de Pages" && git push`.
+3. `gh api -X PUT repos/gsalgadotoledo/calculadora/pages -f build_type=workflow`.
+
+Desde ahí cada push a `main` corre tests, build y publica; `npm run deploy`
+deja de hacer falta.
