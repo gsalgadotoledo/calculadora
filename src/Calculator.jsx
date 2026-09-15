@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { initialState, reducer, keyToAction } from './calculator.js'
 import './Calculator.css'
 
@@ -28,8 +28,42 @@ const BUTTONS = [
   { label: '=', action: { type: 'equals' }, kind: 'eq' },
 ]
 
+// Tres columnas que aparecen a la izquierda en modo científico, fila a fila.
+const SCI_BUTTONS = [
+  { label: 'angle', action: { type: 'toggleAngle' }, name: 'Grados o radianes' },
+  { label: 'sin', action: { type: 'unary', value: 'sin' } },
+  { label: 'cos', action: { type: 'unary', value: 'cos' } },
+
+  { label: 'tan', action: { type: 'unary', value: 'tan' } },
+  { label: 'ln', action: { type: 'unary', value: 'ln' } },
+  { label: 'log', action: { type: 'unary', value: 'log' } },
+
+  { label: '√', action: { type: 'unary', value: 'sqrt' }, name: 'Raíz cuadrada' },
+  { label: 'x²', action: { type: 'unary', value: 'square' }, name: 'Cuadrado' },
+  { label: 'xʸ', action: { type: 'operator', value: '^' }, name: 'Potencia', kind: 'op' },
+
+  { label: '1/x', action: { type: 'unary', value: 'inv' }, name: 'Inverso' },
+  { label: 'x!', action: { type: 'unary', value: 'fact' }, name: 'Factorial' },
+  { label: 'π', action: { type: 'constant', value: 'pi' } },
+
+  { label: 'eˣ', action: { type: 'unary', value: 'exp' }, name: 'e elevado a x' },
+  { label: '10ˣ', action: { type: 'unary', value: 'pow10' }, name: '10 elevado a x' },
+  { label: 'e', action: { type: 'constant', value: 'e' } },
+]
+
+const SCI_KEY = 'calc:scientific'
+
+function readSciPref() {
+  try { return localStorage.getItem(SCI_KEY) === '1' } catch { return false }
+}
+
 export default function Calculator() {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const [scientific, setScientific] = useState(readSciPref)
+
+  useEffect(() => {
+    try { localStorage.setItem(SCI_KEY, scientific ? '1' : '0') } catch { /* modo privado, da igual */ }
+  }, [scientific])
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -47,31 +81,48 @@ export default function Calculator() {
       ? `${state.accumulator} ${state.operator === '-' ? '−' : state.operator}`
       : ''
 
+  const renderKey = (b) => {
+    const active = b.kind === 'op' && state.operator === b.action.value && state.waitingForOperand
+    const cls = [
+      'calc__key',
+      b.kind ? `calc__key--${b.kind}` : '',
+      b.wide ? 'calc__key--wide' : '',
+      active ? 'is-active' : '',
+    ].filter(Boolean).join(' ')
+    const label = b.label === 'angle' ? (state.angle === 'deg' ? 'deg' : 'rad') : b.label
+    return (
+      <button key={b.label} type="button" className={cls} aria-label={b.name} onClick={() => dispatch(b.action)}>
+        {label}
+      </button>
+    )
+  }
+
   return (
-    <div className="calc" role="application" aria-label="Calculadora">
+    <div className={`calc${scientific ? ' calc--sci' : ''}`} role="application" aria-label="Calculadora">
+      <div className="calc__bar">
+        <button
+          type="button"
+          className={`calc__toggle${scientific ? ' is-on' : ''}`}
+          aria-pressed={scientific}
+          onClick={() => setScientific((v) => !v)}
+        >
+          Científica
+        </button>
+        <span className="calc__angle" aria-live="polite">{scientific ? state.angle.toUpperCase() : ''}</span>
+      </div>
       <div className="calc__screen">
-        <div className="calc__pending" aria-hidden="true">{pending || ' '}</div>
+        <div className="calc__pending" aria-hidden="true">{pending || ' '}</div>
         <output className="calc__display" aria-live="polite" data-length={state.display.length}>
           {state.display}
         </output>
       </div>
       <div className="calc__keys">
-        {BUTTONS.map((b) => {
-          const active = b.kind === 'op' && state.operator === b.action.value && state.waitingForOperand
-          const cls = [
-            'calc__key',
-            b.kind ? `calc__key--${b.kind}` : '',
-            b.wide ? 'calc__key--wide' : '',
-            active ? 'is-active' : '',
-          ].filter(Boolean).join(' ')
-          return (
-            <button key={b.label} type="button" className={cls} onClick={() => dispatch(b.action)}>
-              {b.label}
-            </button>
-          )
-        })}
+        {scientific && <div className="calc__sci">{SCI_BUTTONS.map(renderKey)}</div>}
+        <div className="calc__basic">{BUTTONS.map(renderKey)}</div>
       </div>
-      <p className="calc__hint">Teclado: números, + − * / , Enter, Backspace, Esc</p>
+      <p className="calc__hint">
+        Teclado: números, + − * / ^ ! , Enter, Backspace, Esc{scientific ? ' · r = √, p = π' : ''}
+      </p>
     </div>
   )
 }
