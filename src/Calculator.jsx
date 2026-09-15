@@ -38,16 +38,16 @@ const SCI_BUTTONS = [
   { label: 'ln', action: { type: 'unary', value: 'ln' } },
   { label: 'log', action: { type: 'unary', value: 'log' } },
 
-  { label: '√', action: { type: 'unary', value: 'sqrt' }, name: 'Raíz cuadrada' },
-  { label: 'x²', action: { type: 'unary', value: 'square' }, name: 'Cuadrado' },
-  { label: 'xʸ', action: { type: 'operator', value: '^' }, name: 'Potencia', kind: 'op' },
+  { label: 'sqrt', action: { type: 'unary', value: 'sqrt' }, name: 'Raíz cuadrada' },
+  { label: 'x^2', action: { type: 'unary', value: 'square' }, name: 'Cuadrado' },
+  { label: 'x^y', action: { type: 'operator', value: '^' }, name: 'Potencia', kind: 'op' },
 
   { label: '1/x', action: { type: 'unary', value: 'inv' }, name: 'Inverso' },
   { label: 'x!', action: { type: 'unary', value: 'fact' }, name: 'Factorial' },
   { label: 'π', action: { type: 'constant', value: 'pi' } },
 
-  { label: 'eˣ', action: { type: 'unary', value: 'exp' }, name: 'e elevado a x' },
-  { label: '10ˣ', action: { type: 'unary', value: 'pow10' }, name: '10 elevado a x' },
+  { label: 'e^x', action: { type: 'unary', value: 'exp' }, name: 'e elevado a x' },
+  { label: '10^x', action: { type: 'unary', value: 'pow10' }, name: '10 elevado a x' },
   { label: 'e', action: { type: 'constant', value: 'e' } },
 ]
 
@@ -106,7 +106,7 @@ export default function Calculator() {
           aria-pressed={scientific}
           onClick={() => setScientific((v) => !v)}
         >
-          Científica
+          <span aria-hidden="true">🍄 </span>Científica
         </button>
         <span className="calc__angle" aria-live="polite">{scientific ? state.angle.toUpperCase() : ''}</span>
       </div>

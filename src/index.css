@@ -2,15 +2,68 @@
 
 html, body, #root { height: 100%; margin: 0; }
 
+/* Mundo 1-1: cielo NES, nubes, colinas y suelo de ladrillo. */
 body {
-  background: radial-gradient(circle at 30% 20%, #2a2a3d, #0d0d12 70%);
-  color: #f5f5f7;
-  -webkit-font-smoothing: antialiased;
+  --sky: #5c94fc;
+  --ground: #c84c0c;
+  --ground-dark: #6b2a00;
+  --ink: #000;
+
+  background: var(--sky);
+  color: #fff;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  -webkit-font-smoothing: none;
+  image-rendering: pixelated;
+  overflow-x: hidden;
 }
 
 .app {
+  position: relative;
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 24px 24px 96px;
+  isolation: isolate;
+}
+
+/* Nubes: «píxeles» de 16px apilados en escalera, dibujados con box-shadow
+   desde un punto de 16×16. Una a la izquierda, otra a la derecha. */
+.app::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 96px;
+  left: 4%;
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  --c: #fff;
+  box-shadow:
+    /* nube 1: 6 de ancho, 3 de alto */
+    0 0 var(--c), 16px 0 var(--c), 32px 0 var(--c), 48px 0 var(--c), 64px 0 var(--c), 80px 0 var(--c),
+    16px -16px var(--c), 32px -16px var(--c), 48px -16px var(--c), 64px -16px var(--c),
+    32px -32px var(--c), 48px -32px var(--c),
+    /* nube 2: a la derecha, más pequeña y más baja */
+    calc(100vw - 180px) 48px var(--c), calc(100vw - 164px) 48px var(--c), calc(100vw - 148px) 48px var(--c), calc(100vw - 132px) 48px var(--c),
+    calc(100vw - 164px) 32px var(--c), calc(100vw - 148px) 32px var(--c);
+  pointer-events: none;
+}
+
+/* Suelo: dos filas de ladrillos con mortero negro. */
+.app::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  background:
+    /* fila 1: ladrillos de 32px con mortero vertical de 4px */
+    repeating-linear-gradient(90deg, var(--ground) 0 28px, var(--ink) 28px 32px) 0 0 / 100% 28px no-repeat,
+    /* fila 2, corrida media pieza */
+    repeating-linear-gradient(90deg, var(--ground) 0 28px, var(--ink) 28px 32px) 16px 32px / 100% 28px no-repeat,
+    var(--ink);
+  border-top: 4px solid var(--ink);
+  pointer-events: none;
 }

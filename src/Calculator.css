@@ -1,39 +1,58 @@
+/* Calculadora estilo Super Mario Bros (NES): todo pixel, sin esquinas
+   redondeadas, sombras duras y la paleta del Mundo 1-1. */
 .calc {
-  --bg: #1c1c1e;
-  --screen: #111113;
-  --key: #2c2c2e;
-  --key-hover: #3a3a3c;
-  --sci: #232325;
-  --fn: #a5a5a5;
-  --fn-text: #111;
-  --op: #ff9f0a;
-  --op-text: #fff;
-  --text: #f5f5f7;
-  --muted: #8e8e93;
+  --ink: #000;
+  --brick: #c84c0c;
+  --brick-light: #fc9838;
+  --brick-dark: #6b2a00;
+  --block: #fbd000;        /* bloque «?» */
+  --block-dark: #c47a00;
+  --block-text: #000;
+  --pipe: #00a800;         /* tubería */
+  --pipe-light: #80d010;
+  --pipe-dark: #005c00;
+  --mario: #e52521;        /* rojo gorra */
+  --mario-dark: #8a0e0c;
+  --coin: #fbd000;
+  --text: #fff;
+  --muted: #ffd7a8;
+  --px: 4px;               /* «píxel» base */
 
-  width: min(100%, 340px);
+  width: min(100%, 360px);
   padding: 16px;
-  border-radius: 24px;
-  background: var(--bg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  border: var(--px) solid var(--ink);
+  background:
+    /* ladrillos 32×32 a tresbolillo: en cada celda de 32×64, el mortero
+       vertical va arriba a la izquierda y abajo corrido media pieza */
+    conic-gradient(at 4px 32px, transparent 0 75%, var(--ink) 75%) 0 0 / 32px 64px,
+    conic-gradient(at 4px 32px, transparent 0 50%, var(--ink) 50% 75%, transparent 75%) 16px 0 / 32px 64px,
+    linear-gradient(var(--ink) 4px, transparent 4px) 0 0 / 100% 32px,
+    var(--brick);
+  box-shadow: 8px 8px 0 var(--ink);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  -webkit-font-smoothing: none;
   user-select: none;
 }
 
+.calc--sci { width: min(100%, 600px); }
+
+/* Pantalla: la barra de puntuación del HUD. */
 .calc__screen {
-  background: var(--screen);
-  border-radius: 16px;
-  padding: 14px 18px 12px;
-  margin-bottom: 14px;
+  background: var(--ink);
+  border: var(--px) solid var(--ink);
+  outline: var(--px) solid var(--brick-light);
+  outline-offset: calc(var(--px) * -2);
+  padding: 14px 14px 12px;
+  margin-bottom: 16px;
   text-align: right;
   overflow: hidden;
 }
 
 .calc__pending {
-  min-height: 1.2em;
-  font-size: 1rem;
-  color: var(--muted);
+  min-height: 1.4em;
+  font-size: 0.7rem;
+  color: var(--coin);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -41,57 +60,61 @@
 
 .calc__display {
   display: block;
-  font-size: 3rem;
-  font-weight: 300;
-  line-height: 1.15;
+  font-size: 1.9rem;
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 3px 3px 0 var(--brick-dark);
 }
 .calc__display[data-length='10'],
-.calc__display[data-length='11'] { font-size: 2.5rem; }
+.calc__display[data-length='11'] { font-size: 1.5rem; }
 .calc__display[data-length='12'],
 .calc__display[data-length='13'],
-.calc__display[data-length='14'] { font-size: 2.1rem; }
+.calc__display[data-length='14'] { font-size: 1.25rem; }
 .calc__display[data-length='15'],
 .calc__display[data-length='16'],
 .calc__display[data-length='17'],
-.calc__display[data-length='18'] { font-size: 1.7rem; }
-
-.calc--sci { width: min(100%, 560px); }
+.calc__display[data-length='18'] { font-size: 1rem; }
 
 .calc__bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
+/* Botón «Científica»: un champiñón — rojo con lunares cuando está activo. */
 .calc__toggle {
-  border: 1px solid var(--key-hover);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--muted);
+  border: var(--px) solid var(--ink);
+  background: var(--pipe);
+  color: var(--text);
   font: inherit;
-  font-size: 0.8rem;
-  padding: 4px 12px;
+  font-size: 0.6rem;
+  padding: 8px 12px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  box-shadow: var(--px) var(--px) 0 var(--ink);
+  text-shadow: 2px 2px 0 var(--pipe-dark);
+  transition: background 0.08s;
 }
-.calc__toggle:hover { background: var(--key); color: var(--text); }
-.calc__toggle.is-on { background: var(--op); border-color: var(--op); color: var(--op-text); }
-.calc__toggle:focus-visible { outline: 2px solid var(--op); outline-offset: 2px; }
+.calc__toggle:hover { background: var(--pipe-light); }
+.calc__toggle:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.calc__toggle.is-on {
+  background: var(--mario);
+  text-shadow: 2px 2px 0 var(--mario-dark);
+}
+.calc__toggle:focus-visible { outline: var(--px) solid var(--coin); outline-offset: 2px; }
 
 .calc__angle {
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  font-size: 0.6rem;
+  color: var(--coin);
+  text-shadow: 2px 2px 0 var(--ink);
 }
 
 .calc__keys {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .calc__basic {
@@ -107,50 +130,97 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
-.calc__sci .calc__key {
-  font-size: 1.05rem;
-  background: var(--sci);
-}
-.calc__sci .calc__key:hover { background: var(--key); }
-.calc__sci .calc__key--op { background: var(--op); }
-.calc__sci .calc__key--op:hover { background: #ffb340; }
-.calc__sci .calc__key--op.is-active { background: #fff; color: var(--op); }
 
+/* Tecla base: un bloque «?» amarillo con bisel de píxel. */
 .calc__key {
   aspect-ratio: 1;
-  border: 0;
-  border-radius: 50%;
-  background: var(--key);
-  color: var(--text);
+  border: var(--px) solid var(--ink);
+  background: var(--block);
+  color: var(--block-text);
   font: inherit;
-  font-size: 1.5rem;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.12s, transform 0.06s;
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--block-dark),
+    inset var(--px) var(--px) 0 #fff5b0,
+    var(--px) var(--px) 0 var(--ink);
+  transition: background 0.08s, filter 0.08s;
 }
-.calc__key:hover { background: var(--key-hover); }
-.calc__key:active { transform: scale(0.95); }
-.calc__key:focus-visible { outline: 2px solid var(--op); outline-offset: 2px; }
+.calc__key:hover { filter: brightness(1.1); }
+/* Al pulsar, el bloque «salta» como cuando Mario le da un cabezazo. */
+.calc__key:active {
+  transform: translate(2px, 2px);
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--block-dark),
+    inset var(--px) var(--px) 0 #fff5b0,
+    2px 2px 0 var(--ink);
+}
+.calc__key:focus-visible { outline: var(--px) solid #fff; outline-offset: 2px; }
 
-.calc__key--fn { background: var(--fn); color: var(--fn-text); }
-.calc__key--fn:hover { background: #d4d4d2; }
+/* Funciones (C, ±, %): verde tubería. */
+.calc__key--fn,
+.calc__sci .calc__key {
+  background: var(--pipe);
+  color: var(--text);
+  text-shadow: 2px 2px 0 var(--pipe-dark);
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--pipe-dark),
+    inset var(--px) var(--px) 0 var(--pipe-light),
+    var(--px) var(--px) 0 var(--ink);
+}
+.calc__key--fn:active,
+.calc__sci .calc__key:active {
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--pipe-dark),
+    inset var(--px) var(--px) 0 var(--pipe-light),
+    2px 2px 0 var(--ink);
+}
+.calc__sci .calc__key { font-size: 0.65rem; }
 
+/* Operadores y «=»: rojo Mario. */
 .calc__key--op,
-.calc__key--eq { background: var(--op); color: var(--op-text); }
-.calc__key--op:hover,
-.calc__key--eq:hover { background: #ffb340; }
-.calc__key--op.is-active { background: #fff; color: var(--op); }
+.calc__sci .calc__key--op,
+.calc__key--eq {
+  background: var(--mario);
+  color: var(--text);
+  text-shadow: 2px 2px 0 var(--mario-dark);
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--mario-dark),
+    inset var(--px) var(--px) 0 #ff7b6e,
+    var(--px) var(--px) 0 var(--ink);
+}
+.calc__key--op:active,
+.calc__sci .calc__key--op:active,
+.calc__key--eq:active {
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--mario-dark),
+    inset var(--px) var(--px) 0 #ff7b6e,
+    2px 2px 0 var(--ink);
+}
+/* Operador pendiente: se vuelve moneda. */
+.calc__key--op.is-active,
+.calc__sci .calc__key--op.is-active {
+  background: var(--coin);
+  color: var(--ink);
+  text-shadow: none;
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--block-dark),
+    inset var(--px) var(--px) 0 #fff5b0,
+    var(--px) var(--px) 0 var(--ink);
+}
 
 .calc__key--wide {
   aspect-ratio: auto;
   grid-column: span 2;
-  border-radius: 999px;
   text-align: left;
-  padding-left: 28px;
+  padding-left: 22px;
 }
 
 .calc__hint {
-  margin: 14px 0 0;
-  font-size: 0.75rem;
+  margin: 16px 0 0;
+  font-size: 0.5rem;
+  line-height: 1.6;
   color: var(--muted);
   text-align: center;
+  text-shadow: 2px 2px 0 var(--ink);
 }
